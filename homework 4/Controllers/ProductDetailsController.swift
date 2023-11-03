@@ -66,12 +66,12 @@ class ProductDetailsController: UIViewController {
         view.textColor = .gray
         view.font = .systemFont(ofSize: 15, weight: .regular)
         let text = "Room Type \nColor \nMaterial \nDimensions \nWeight"
-                let paragraphStyle = NSMutableParagraphStyle()
-                paragraphStyle.lineSpacing = 6
-                let attributes = [NSAttributedString.Key.paragraphStyle : paragraphStyle]
-                let attributedText = NSAttributedString(string: text, attributes: attributes)
-                view.attributedText = attributedText
-
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineSpacing = 6
+        let attributes = [NSAttributedString.Key.paragraphStyle : paragraphStyle]
+        let attributedText = NSAttributedString(string: text, attributes: attributes)
+        view.attributedText = attributedText
+        
         return view
     }()
     
@@ -102,6 +102,50 @@ class ProductDetailsController: UIViewController {
         return view
     }()
     
+    private let goodsCounterView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .clear
+        return view
+    }()
+    
+    private let minusBtn: UIButton = {
+        let view = UIButton(type: .system)
+        view.setTitle("-", for: .normal)
+        view.backgroundColor = .systemGray5
+        view.layer.cornerRadius = 16
+        view.titleLabel?.font = UIFont.systemFont(ofSize: 30, weight: .light)
+        view.clipsToBounds = true
+        view.setTitleColor(UIColor.black, for: .normal)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    private let countLbl: UILabel = {
+        let view = UILabel()
+        view.textColor = .black
+        view.font = .systemFont(ofSize: 20, weight: .regular)
+        view.text = "1"
+        view.textAlignment = .center
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    private let plusBtn: UIButton = {
+        let view = UIButton(type: .system)
+        view.setTitle("+", for: .normal)
+        view.backgroundColor = .systemGray5
+        view.layer.cornerRadius = 16
+        view.titleLabel?.font = UIFont.systemFont(ofSize: 20, weight: .light)
+        view.clipsToBounds = true
+        view.setTitleColor(UIColor.black, for: .normal)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    var count = 0
+    //var plusBtnTappedFlag = false
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
@@ -114,7 +158,7 @@ class ProductDetailsController: UIViewController {
         setupConstraintsForImageView()
         
         imageView.addSubview(heartBtn)
-    setupConstraintsForHeartButton()
+        setupConstraintsForHeartButton()
         
         view.addSubview(nameOfHouseholdGoods)
         setupConstraintsForNameOfHouseholdGoods()
@@ -137,6 +181,17 @@ class ProductDetailsController: UIViewController {
         view.addSubview(buyButton)
         setupConstraintsForBuyButton()
         
+        view.addSubview(goodsCounterView)
+        setupConstraintsForGoodsCounterView()
+        
+        goodsCounterView.addSubview(minusBtn)
+        setupConstraintsForMinusBtn()
+        
+        goodsCounterView.addSubview(countLbl)
+        setupConstraintsForCountLbl()
+        
+        goodsCounterView.addSubview(plusBtn)
+        setupConstraintsForPlusBtn()
     }
     private func setupConstraintsForImageView() {
         NSLayoutConstraint.activate([
@@ -150,9 +205,10 @@ class ProductDetailsController: UIViewController {
     
     func initDataCell(_ goods: Goods) {
         nameOfHouseholdGoods.text = goods.nameOfFurniture
-        priceLbl.text = goods.price
+        priceLbl.text = "$\(goods.price)"
         infoAboutGoods.text = goods.infoGoods
     }
+
     
     private func setupConstraintsForHeartButton() {
         NSLayoutConstraint.activate([
@@ -161,13 +217,14 @@ class ProductDetailsController: UIViewController {
             heartBtn.widthAnchor.constraint(equalToConstant: 36),
             heartBtn.heightAnchor.constraint(equalToConstant: 36)
         ])
-        heartBtn.addTarget(self, action: #selector(heartButtonTapped), for: .touchUpInside)
+        
+        heartBtn.addTarget(self, action: #selector(heartButtonTapped(_ :)), for: .touchUpInside)
+    }
+    
+    @objc func heartButtonTapped(_ sender: UIButton) {
+        heartBtn.tintColor = .red
 }
-
-@objc private func heartButtonTapped() {
-    heartBtn.tintColor = .red
-}
-
+    
     
     private func setupConstraintsForNameOfHouseholdGoods() {
         NSLayoutConstraint.activate([
@@ -189,8 +246,8 @@ class ProductDetailsController: UIViewController {
     
     private func setupConstraintsForPriceLbl() {
         NSLayoutConstraint.activate([
-        priceLbl.topAnchor.constraint(equalTo: starsImageView.bottomAnchor, constant: 18),
-        priceLbl.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 12)
+            priceLbl.topAnchor.constraint(equalTo: starsImageView.bottomAnchor, constant: 18),
+            priceLbl.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 12)
         ])
     }
     
@@ -221,10 +278,70 @@ class ProductDetailsController: UIViewController {
     
     private func setupConstraintsForBuyButton() {
         NSLayoutConstraint.activate([
-        buyButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -30),
-        buyButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-        buyButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-        buyButton.heightAnchor.constraint(equalToConstant: 50)
+            buyButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -30),
+            buyButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            buyButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            buyButton.heightAnchor.constraint(equalToConstant: 50)
         ])
+    }
+    
+    private func setupConstraintsForGoodsCounterView() {
+        NSLayoutConstraint.activate([
+        goodsCounterView.topAnchor.constraint(equalTo: starsImageView.bottomAnchor, constant: 14),
+        goodsCounterView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+        goodsCounterView.heightAnchor.constraint(equalToConstant: 32),
+        goodsCounterView.widthAnchor.constraint(equalToConstant: 118)
+        ])
+    }
+    
+    private func setupConstraintsForMinusBtn() {
+        NSLayoutConstraint.activate([
+            minusBtn.topAnchor.constraint(equalTo: goodsCounterView.topAnchor),
+            minusBtn.leadingAnchor.constraint(equalTo: goodsCounterView.leadingAnchor),
+            minusBtn.widthAnchor.constraint(equalToConstant: 32),
+            minusBtn.heightAnchor.constraint(equalToConstant: 32)
+        ])
+        minusBtn.addTarget(self, action: #selector(minusBtnTapped), for: .touchUpInside)
+    }
+    
+    @objc func minusBtnTapped(_ sender: UIButton) {
+        if count > 0 {
+            count = count - 1
+            countLbl.text = "\(count)"
+            
+            if let goods = goods {
+                        let totalPrice = goods.price * count
+                        priceLbl.text = "$\(totalPrice)"
+                    }
+        }
+    }
+    
+    private func setupConstraintsForCountLbl() {
+        NSLayoutConstraint.activate([
+            countLbl.centerXAnchor.constraint(equalTo: goodsCounterView.centerXAnchor),
+            countLbl.centerYAnchor.constraint(equalTo: goodsCounterView.centerYAnchor),
+            countLbl.heightAnchor.constraint(equalToConstant: 24),
+            countLbl.widthAnchor.constraint(equalToConstant: 50)
+            ])
+        
+    }
+    private func setupConstraintsForPlusBtn() {
+        NSLayoutConstraint.activate([
+            plusBtn.topAnchor.constraint(equalTo: goodsCounterView.topAnchor),
+            plusBtn.trailingAnchor.constraint(equalTo: goodsCounterView.trailingAnchor),
+            plusBtn.widthAnchor.constraint(equalToConstant: 32),
+            plusBtn.heightAnchor.constraint(equalToConstant: 32)
+        ])
+        plusBtn.addTarget(self, action: #selector(plusBtnTapped), for: .touchUpInside)
+    }
+    
+    @objc func plusBtnTapped(_ sender: UIButton) {
+        count = count + 1
+        countLbl.text = "\(count)"
+        
+        if let goods = goods {
+                let totalPrice = goods.price * count
+                priceLbl.text = "$\(totalPrice)"
+            }
     }
 }

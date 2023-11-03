@@ -13,6 +13,6 @@ struct Goods {
     var count: String
     var nameOfFurniture: String
     var stars: String
-    var price: String
+    var price: Int
     var infoGoods: String 
 }
